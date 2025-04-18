@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:layout_marginTop="?attr/actionBarSize"
+    tools:context=".MainActivity">
+
+    <Button
+        android:id="@+id/btnSelectPdf"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Select PDFs" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <TextView
+                android:id="@+id/txtSelectedFiles"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="No files selected"
+                android:paddingTop="16dp"
+                android:fontFamily="sans-serif"
+                android:textSize="18sp"
+                android:textColor="#FFFFFF" />
+
+        </LinearLayout>
+    </ScrollView>
+
+    <Button
+        android:id="@+id/btnSplit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Split Colored and B/W pdf"
+        android:layout_marginTop="24dp"
+        android:enabled="false"/>
+
+    <com.airbnb.lottie.LottieAnimationView
+        android:layout_width="wrap_content"
+        app:lottie_rawRes="@raw/confettianim"
+        android:id="@+id/pressed"
+        app:lottie_autoPlay="true"
+        app:lottie_loop="true"
+        android:visibility="gone"
+        android:layout_gravity="center"
+        android:layout_height="wrap_content"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:gravity="center"
+        android:layout_height="wrap_content">
+        <Button
+            android:id="@+id/openColorPdfBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Open Colored PDF"
+            android:layout_margin="5dp"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/openBwPdfBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Open B/W PDF"
+            android:layout_margin="5dp"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/clrbutton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Clear Selection"
+        android:layout_margin="10dp"
+        android:layout_gravity="center"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:gravity="bottom|center"
+        android:layout_marginBottom="?attr/actionBarSize"
+        android:layout_height="match_parent">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="By Durgesh Mahajan"
+            android:textSize="22dp"
+            android:gravity="bottom"
+            android:fontFamily="sans-serif-condensed"/>
+    </LinearLayout>
+
+</LinearLayout>
