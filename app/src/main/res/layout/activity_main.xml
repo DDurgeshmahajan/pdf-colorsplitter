@@ -10,6 +10,11 @@
     android:layout_marginTop="?attr/actionBarSize"
     tools:context=".MainActivity">
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="B/W = Black and White Format"
+        android:layout_marginBottom="5dp"/>
     <Button
         android:id="@+id/btnSelectPdf"
         android:layout_width="match_parent"
@@ -20,8 +25,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_width="match_parent"
+            android:orientation="vertical"
+            android:layout_height="400dp">
             <TextView
                 android:id="@+id/txtSelectedFiles"
                 android:layout_width="match_parent"
@@ -31,18 +37,26 @@
                 android:fontFamily="sans-serif"
                 android:textSize="18sp"
                 android:textColor="#FFFFFF" />
+            <Button
+                android:id="@+id/btnSplit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:layout_marginBottom="25dp"
+                android:text="Split Colored and B/W pdf"
+                android:layout_marginTop="24dp"
+                android:enabled="false"/>
+
 
         </LinearLayout>
     </ScrollView>
 
-    <Button
-        android:id="@+id/btnSplit"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Split Colored and B/W pdf"
-        android:layout_marginTop="24dp"
-        android:enabled="false"/>
 
+    <ProgressBar
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/pro"
+        android:layout_gravity="center"/>
     <com.airbnb.lottie.LottieAnimationView
         android:layout_width="wrap_content"
         app:lottie_rawRes="@raw/confettianim"
@@ -52,6 +66,16 @@
         android:visibility="gone"
         android:layout_gravity="center"
         android:layout_height="wrap_content"/>
+
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Loading..."
+        android:gravity="center"
+        android:id="@+id/noticetext"
+        android:visibility="gone"
+        android:textSize="18dp"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -85,16 +109,17 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:gravity="bottom|center"
+        android:layout_height="match_parent"
         android:layout_marginBottom="?attr/actionBarSize"
-        android:layout_height="match_parent">
+        android:gravity="bottom|center">
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="By Durgesh Mahajan"
-            android:textSize="22dp"
+            android:fontFamily="sans-serif-condensed"
             android:gravity="bottom"
-            android:fontFamily="sans-serif-condensed"/>
+            android:text="By Durgesh Mahajan"
+            android:textSize="22dp" />
     </LinearLayout>
 
 </LinearLayout>

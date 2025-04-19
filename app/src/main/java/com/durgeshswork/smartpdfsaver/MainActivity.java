@@ -4,6 +4,7 @@ import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.Context;
@@ -12,6 +13,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.OpenableColumns;
 import android.util.Log;
 import android.view.View;
@@ -30,8 +32,12 @@ import androidx.core.view.WindowInsetsCompat;
 
 import java.io.File;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+
 import android.content.Intent;
 
 import com.airbnb.lottie.LottieAnimationView;
@@ -55,11 +61,13 @@ public class MainActivity extends AppCompatActivity {
 
         private static final int PICK_PDF_FILES = 1001;
         private List<Uri> selectedUris = new ArrayList<>();
-        private TextView txtSelectedFiles;
+        private TextView txtSelectedFiles,notice;
         private Button btnSplit;
+        private ProgressBar progressBar;
         LottieAnimationView pressed;
         Button openColorPdfBtn,openBwPdfBtn,clearbutt;
         private InterstitialAd interstitialAd;
+    int i=0;
         @Override
         protected void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
@@ -72,10 +80,13 @@ public class MainActivity extends AppCompatActivity {
             loadInterstitialAd();
             Button btnSelectPdf = findViewById(R.id.btnSelectPdf);
             txtSelectedFiles = findViewById(R.id.txtSelectedFiles);
+            notice=findViewById(R.id.noticetext);
             btnSplit = findViewById(R.id.btnSplit);
             pressed=findViewById(R.id.pressed);
             btnSplit.setEnabled(false);
-             openColorPdfBtn = findViewById(R.id.openColorPdfBtn);
+            progressBar=findViewById(R.id.pro);
+            progressBar.setVisibility(GONE);
+            openColorPdfBtn = findViewById(R.id.openColorPdfBtn);
              openBwPdfBtn = findViewById(R.id.openBwPdfBtn);
              clearbutt=findViewById(R.id.clrbutton);
 
@@ -91,13 +102,15 @@ public class MainActivity extends AppCompatActivity {
                     openColorPdfBtn.setVisibility(GONE);
                     openBwPdfBtn.setVisibility(GONE);
                     clearbutt.setVisibility(GONE);
+                    notice.setVisibility(GONE);
                 }
             });
             btnSplit.setOnClickListener(v -> {
                 btnSplit.setVisibility(GONE);
                 Toast.makeText(this, "Processing " + selectedUris.size() + " file(s)...", Toast.LENGTH_SHORT).show();
                 // TODO: Add PDF color vs. B&W splitting logic here
-                splitPdfByColor(MainActivity.this, selectedUris, pressed,openColorPdfBtn,openBwPdfBtn,clearbutt);  // 'this' refers to your Activity or Context
+
+                splitPdfByColor(MainActivity.this, selectedUris, pressed,openColorPdfBtn,openBwPdfBtn,clearbutt,progressBar);  // 'this' refers to your Activity or Context
             });
         }
     private void showAdOrProceed() {
@@ -110,33 +123,34 @@ public class MainActivity extends AppCompatActivity {
 
                     Log.d("AdMob", "Ad Dismissed - Moving to Next Screen");
                     loadInterstitialAd();
-                    openColorPdfBtn.setVisibility(VISIBLE);
-                    openBwPdfBtn.setVisibility(VISIBLE);
+//                    openColorPdfBtn.setVisibility(VISIBLE);
+//                    openBwPdfBtn.setVisibility(VISIBLE);
 
                 }
                 @Override
                 public void onAdFailedToShowFullScreenContent(AdError adError) {
                     Log.e("AdMob", "Ad Failed to Show: " + adError.getMessage() );
-                    openColorPdfBtn.setVisibility(VISIBLE);
-                    openBwPdfBtn.setVisibility(VISIBLE);
+//                    openColorPdfBtn.setVisibility(VISIBLE);
+//                    openBwPdfBtn.setVisibility(VISIBLE);
                 }
             });
             interstitialAd.show(this);
         }
         else{
             Log.d("AdMob", "Ad Not Ready - Moving to Next Screen");
-            openColorPdfBtn.setVisibility(VISIBLE);
-            openBwPdfBtn.setVisibility(VISIBLE);
+//            openColorPdfBtn.setVisibility(VISIBLE);
+//            openBwPdfBtn.setVisibility(VISIBLE);
 
         }
 
     }
 
-    public void splitPdfByColor(Activity activity, List<Uri> pdfUris, View pressed, View openColorPdfBtn, View openBwPdfBtn,View clrbutton) {
+    public void splitPdfByColor(Activity activity, List<Uri> pdfUris, View pressed, View openColorPdfBtn, View openBwPdfBtn,View clrbutton,View progressbar) {
         new Thread(() -> {
             try {
-                activity.runOnUiThread(() -> pressed.setVisibility(VISIBLE));
+
                 activity.runOnUiThread(()->{
+                    progressbar.setVisibility(VISIBLE);
                     pressed.setVisibility(VISIBLE);
                     clrbutton.setVisibility(GONE);
                 });
@@ -176,36 +190,84 @@ public class MainActivity extends AppCompatActivity {
                         Log.d("PDFSplit", "File error: " + e.getMessage());
                     }
                 }
+                String timestamp = new SimpleDateFormat("MMdd_HHmm", Locale.getDefault()).format(new Date());
 
-                File dir = new File(activity.getExternalFilesDir(null), "SplitPDFs");
+                File dir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "SplitPDFs");
                 if (!dir.exists()) dir.mkdirs();
 
-                File colorFile = new File(dir, "Merged_Color.pdf");
-                File bwFile = new File(dir, "Merged_BW.pdf");
+                File colorFile = null;
+                File bwFile = null;
 
-                colorDoc.save(colorFile);
-                bwDoc.save(bwFile);
+                if (colorDoc.getNumberOfPages() > 0) {
+                    colorFile = new File(dir, "Merged_Color_"+timestamp+".pdf");
+                    colorDoc.save(colorFile);
+                }
 
-
+                if (bwDoc.getNumberOfPages() > 0) {
+                    bwFile = new File(dir, "Merged_BW_"+timestamp+".pdf");
+                    bwDoc.save(bwFile);
+                }
 
                 Log.d("PDFSplit", "Merge & split complete");
 
+                File finalColorFile = colorFile;
+                File finalBwFile = bwFile;
                 activity.runOnUiThread(() -> {
                     pressed.setVisibility(View.GONE);
+                    progressBar.setVisibility(GONE);
                     clrbutton.setVisibility(VISIBLE);
                     Toast.makeText(activity, "Split & merge complete!", Toast.LENGTH_SHORT).show();
                     showAdOrProceed();
-                    openColorPdfBtn.setOnClickListener(v -> openPdf(activity, colorFile));
-                    openBwPdfBtn.setOnClickListener(v -> openPdf(activity, bwFile));
 
+                    if (finalColorFile != null && finalColorFile.exists() && finalColorFile.length() > 0) {
+                        openColorPdfBtn.setVisibility(VISIBLE);
+                        String colorFilePath = finalColorFile.getAbsolutePath();
+                        Toast.makeText(activity, "PDF saved at Downloads", Toast.LENGTH_LONG).show();
+                        i=i+1;
+                        openColorPdfBtn.setOnClickListener(v -> openPdf(activity, finalColorFile));
+                    } else {
+                        notice.setVisibility(VISIBLE);
+                        notice.setText("No colored Pages Found");
+                        notice.setTextSize(16f);
+                        openColorPdfBtn.setVisibility(View.GONE);
+                        Toast.makeText(activity, "No colored pages found.", Toast.LENGTH_SHORT).show();
+                    }
 
+                    if (finalBwFile != null && finalBwFile.exists() && finalBwFile.length() > 0) {
+
+                        String bwFilePath = finalBwFile.getAbsolutePath();
+                        Toast.makeText(activity, " PDF saved at Downloads", Toast.LENGTH_LONG).show();
+                        i=i+1;
+                        openBwPdfBtn.setVisibility(VISIBLE);
+                        openBwPdfBtn.setOnClickListener(v -> openPdf(activity, finalBwFile));
+                    } else {
+                        notice.setVisibility(VISIBLE);
+                        notice.setText("No black and white Pages Found");
+                        notice.setTextSize(16f);
+                        openBwPdfBtn.setVisibility(View.GONE);
+                        Toast.makeText(activity, "No B/W pages found.", Toast.LENGTH_SHORT).show();
+                    }
+                    if(i>0){
+                        new AlertDialog.Builder(this)
+                                .setTitle("File Saved ")
+                                .setMessage("This File saved in - Downloads//SplitPDFs folder")
+                                .setPositiveButton("Okay", (dialog, which) -> dialog.dismiss())
+                                .setCancelable(true)
+                                .show();
+
+                    }
                 });
+
                 colorDoc.close();
                 bwDoc.close();
+
+
 
             } catch (Exception e) {
                 Log.e("PDFSplit", "Processing failed: " + e.getMessage());
                 activity.runOnUiThread(() -> {
+
+                    progressbar.setVisibility(GONE);
                     pressed.setVisibility(View.GONE);
                     Toast.makeText(activity, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
@@ -213,6 +275,18 @@ public class MainActivity extends AppCompatActivity {
         }).start();
     }
     private void openPdf(Context context, File file) {
+
+        if (!file.exists() || file.length() == 0) {
+            new AlertDialog.Builder(context)
+                    .setTitle("NO File")
+                    .setMessage("This File Has No pages! or is empty")
+                    .setPositiveButton("Okay", (dialog, which) -> dialog.dismiss())
+                    .show();
+
+            Toast.makeText(context, "PDF file is empty or missing", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         Uri pdfUri = FileProvider.getUriForFile(
                 context,
                 context.getPackageName() + ".provider",
@@ -228,6 +302,7 @@ public class MainActivity extends AppCompatActivity {
         } catch (ActivityNotFoundException e) {
             Toast.makeText(context, "No app found to open PDF", Toast.LENGTH_SHORT).show();
         }
+
     }
 
     boolean isColor(Bitmap bmp) {
